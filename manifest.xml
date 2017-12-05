@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+	<!-- remote names -->
+	<remote  name="openembedded" fetch="git://git.openembedded.org/"/>
+	<remote  name="yocto" fetch="git://git.yoctoproject.org/"/>
+
+	<!-- github/yocto repos -->
+	<project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
+		revision="55c8a76da5dc099a7bc3838495c672140cedb78e"/>
+	<project path="layers/poky" name="poky" remote="yocto"
+		revision="cca8dd15c8096626052f6d8d25ff1e9a606104a3"/>
+	<project path="layers/meta-ivi" name="meta-ivi" remote="yocto" 
+		revision="be0e29811cd634b65724330c7f027b26ae3daa4f" />
+
+</manifest>

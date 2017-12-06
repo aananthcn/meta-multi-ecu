@@ -5,11 +5,13 @@
 	<remote  name="yocto" fetch="git://git.yoctoproject.org/"/>
 
 	<!-- github/yocto repos -->
-	<project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
-		revision="rocko"/>
 	<project path="layers/poky" name="poky" remote="yocto"
 		revision="rocko"/>
 	<project path="layers/meta-ivi" name="meta-ivi" remote="yocto" 
 		revision="11.0"/>
+	<project path="layers/meta-qt4" name="meta-qt4" remote="yocto" 
+		revision="rocko"/>
 
+	<!-- <project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
+		revision="rocko"/> -->
 </manifest>

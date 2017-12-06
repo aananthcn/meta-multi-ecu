@@ -7,14 +7,14 @@
 	<remote  name="genivi" fetch="https://github.com/GENIVI"/>
 
 	<!-- github/yocto repos -->
-	<project path="layers/poky" name="poky" remote="yocto"
-		revision="pyro"/>
 	<project path="layers/meta-ivi" name="meta-ivi" remote="genivi"
 		revision="13.0"/>
+	<project path="layers/poky" name="poky" remote="yocto"
+		revision="3f97cd3514f3e6025788ab7d6eec586fb7ac542f"/>
 	<project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
-		revision="pyro"/>
+		revision="5e82995148a2844c6f483ae5ddd1438d87ea9fb7"/>
 	<project path="layers/meta-gplv2" name="meta-gplv2" remote="yocto"
-		revision="pyro"/>
+		revision="07e5dd2136a2a7cc069ad8c70bb422fa9d5b14f0"/>
 	<project path="layers/meta-qt5" name="meta-qt5" remote="qt5"
 		revision="pyro"/>
 </manifest>

@@ -3,6 +3,7 @@
 
 # Base this image on core-image-weston
 include recipes-core/images/core-image-weston.bb
+include recipes-yocto-ivi/images/ivi-image.bb
 
 LICENSE = "MIT"
 
@@ -16,10 +17,9 @@ IMAGE_INSTALL += " \
 
 #RDEPENDS += " "
 
+
 IMAGE_FEATURES += " ssh-server-dropbear"
 
-DISTRO_FEATURES = " systemd"
-VIRTUAL-RUNTIME_init_manager = "systemd "
-
-IMAGE_INSTALL_append = " qtbase qtbase-fonts qtbase-plugins qtwayland cinematicexperience \
+IMAGE_INSTALL_append = " \
+	qtbase qtbase-plugins qtwayland cinematicexperience \
 "

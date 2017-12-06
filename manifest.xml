@@ -4,6 +4,7 @@
 	<remote  name="openembedded" fetch="git://git.openembedded.org/"/>
 	<remote  name="yocto" fetch="git://git.yoctoproject.org/"/>
 	<remote  name="github" fetch="https://github.com/"/>
+	<remote  name="genivi" fetch="https://github.com/GENIVI"/>
 
 	<!-- github/yocto repos -->
 	<project path="layers/poky" name="poky" remote="yocto"

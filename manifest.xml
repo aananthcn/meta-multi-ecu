@@ -9,7 +9,7 @@
 	<!-- github/yocto repos -->
 	<project path="layers/poky" name="poky" remote="yocto"
 		revision="pyro"/>
-	<project path="layers/meta-ivi" name="meta-ivi" remote="github"
+	<project path="layers/meta-ivi" name="meta-ivi" remote="genivi"
 		revision="13.0"/>
 	<project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
 		revision="pyro"/>

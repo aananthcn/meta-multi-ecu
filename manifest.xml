@@ -14,6 +14,6 @@
 		revision="pyro"/>
 	<project path="layers/meta-gplv2" name="meta-gplv2" remote="yocto"
 		revision="pyro"/>
-	<project path="layers/meta-qt5" name="meta-qt4" remote="github"
+	<project path="layers/meta-qt5" name="meta-qt5" remote="github"
 		revision="pyro"/>
 </manifest>

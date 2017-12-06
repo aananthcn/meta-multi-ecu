@@ -3,15 +3,17 @@
 	<!-- remote names -->
 	<remote  name="openembedded" fetch="git://git.openembedded.org/"/>
 	<remote  name="yocto" fetch="git://git.yoctoproject.org/"/>
+	<remote  name="github" fetch="https://github.com/"/>
 
 	<!-- github/yocto repos -->
 	<project path="layers/poky" name="poky" remote="yocto"
-		revision="rocko"/>
-	<project path="layers/meta-ivi" name="meta-ivi" remote="yocto" 
-		revision="11.0"/>
-	<project path="layers/meta-qt4" name="meta-qt4" remote="yocto" 
-		revision="rocko"/>
-
-	<!-- <project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
-		revision="rocko"/> -->
+		revision="pyro"/>
+	<project path="layers/meta-ivi" name="meta-ivi" remote="github"
+		revision="13.0"/>
+	<project path="layers/meta-openembedded" name="meta-openembedded" remote="openembedded"
+		revision="pyro"/>
+	<project path="layers/meta-gplv2" name="meta-gplv2" remote="yocto"
+		revision="pyro"/>
+	<project path="layers/meta-qt5" name="meta-qt4" remote="github"
+		revision="pyro"/>
 </manifest>

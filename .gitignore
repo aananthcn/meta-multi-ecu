@@ -3,5 +3,4 @@
 .repo
 build
 layers/poky
-layers/meta-ivi
-layers/meta-openembedded
+layers/meta-*

@@ -3,7 +3,7 @@
 	<!-- remote names -->
 	<remote  name="openembedded" fetch="git://git.openembedded.org/"/>
 	<remote  name="yocto" fetch="git://git.yoctoproject.org/"/>
-	<remote  name="qt5" fetch="git@github.com:meta-qt5/"/>
+	<remote  name="qt5" fetch="https://github.com/meta-qt5"/>
 	<remote  name="genivi" fetch="https://github.com/GENIVI"/>
 
 	<!-- github/yocto repos -->

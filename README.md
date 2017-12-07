@@ -9,7 +9,7 @@
 ## Build
 1. source layers/poky/oe-init-build-env build  
 2. copy .conf files from conf-multi-ecu directory to build/conf directory  
-3. bitbake core-image-weston  
+3. bitbake multi-ecu-image or core-image-weston  
 
 ## Run
 1. ../scripts/scripts/run-multi-ecu  

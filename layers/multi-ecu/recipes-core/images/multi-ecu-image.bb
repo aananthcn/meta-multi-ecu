@@ -21,5 +21,4 @@ IMAGE_INSTALL += " \
 IMAGE_FEATURES += " ssh-server-dropbear"
 
 IMAGE_INSTALL_append = " \
-	qtbase qtbase-plugins qtwayland cinematicexperience \
 "

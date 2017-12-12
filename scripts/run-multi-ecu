@@ -3,13 +3,59 @@
 #IMAGE_NAME=multi-ecu-image
 IMAGE_NAME=core-image-weston
 
+# Get sudo password for this session
+sudo pwd
 
-port=2222
+set -x
+
+
+# OLD WAY OF DOING --
+#port=2222
+#name="Cluster"
+#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.2::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
+
+#port=2223
+#name="Infotainment"
+#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.3::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
+
+
+
+
+# NEW WAY OF DOING --
+# Followed instructions from https://tthtlc.wordpress.com/2015/10/21/qemu-how-to-setup-tuntap-bridge-networking/
+
+# remove stale tap points
+sudo tunctl -d tap0
+sudo tunctl -d tap1
+
+GATEWAY_IP=10.0.3.1
+CLUSTER_IP=10.0.3.2
+INFOTMT_IP=10.0.3.3
+
+# create tap point for cluster
+sudo tunctl -u ${USER}
+sudo ifconfig tap0 ${CLUSTER_IP} up
+sudo route add -host ${CLUSTER_IP} dev tap0
+sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
+sudo arp -Ds ${CLUSTER_IP} eno1 pub
+
+# create tap point for infotainment
+sudo tunctl -u ${USER}
+sudo ifconfig tap1 ${INFOTMT_IP} up
+sudo route add -host ${INFOTMT_IP} dev tap0
+sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
+sudo arp -Ds ${INFOTMT_IP} eno1 pub
+
+# bridge tap points
+sudo ifconfig br0 down
+sudo brctl delbr br0
+sudo brctl addbr br0
+sudo ifconfig br0 ${GATEWAY_IP} up
+sudo brctl addif br0 tap0 tap1
+
+# spawn virtual machines
 name="Cluster"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.2::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$CLUSTER_IP"'::'"$GATEWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
 
-port=2223
 name="Infotainment"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.3::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
-
-
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$INFOTMT_IP"'::'"$GATEWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &

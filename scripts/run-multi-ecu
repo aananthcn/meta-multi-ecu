@@ -1,6 +1,7 @@
 #! /bin/sh
 
-IMAGE_NAME=multi-ecu-image
+#IMAGE_NAME=multi-ecu-image
+IMAGE_NAME=core-image-weston
 
 
 port=2222

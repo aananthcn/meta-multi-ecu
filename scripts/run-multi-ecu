@@ -32,26 +32,32 @@ GATEWAY_IP=10.0.3.1
 CLUSTER_IP=10.0.3.2
 INFOTMT_IP=10.0.3.3
 
-# create tap point for cluster
-sudo tunctl -u ${USER}
-sudo ifconfig tap0 ${CLUSTER_IP} up
-sudo route add -host ${CLUSTER_IP} dev tap0
-sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
-sudo arp -Ds ${CLUSTER_IP} eno1 pub
-
-# create tap point for infotainment
-sudo tunctl -u ${USER}
-sudo ifconfig tap1 ${INFOTMT_IP} up
-sudo route add -host ${INFOTMT_IP} dev tap0
-sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
-sudo arp -Ds ${INFOTMT_IP} eno1 pub
-
-# bridge tap points
+# create bridge for tap points
 sudo ifconfig br0 down
 sudo brctl delbr br0
 sudo brctl addbr br0
 sudo ifconfig br0 ${GATEWAY_IP} up
+sudo route add -host ${GATEWAY_IP} dev br0
+
+# create tap point for cluster
+sudo tunctl -u ${USER}
+sudo ifconfig tap0 ${CLUSTER_IP} up
+sudo route add -host ${CLUSTER_IP} dev tap0
+#sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
+#sudo arp -Ds ${CLUSTER_IP} eno1 pub
+
+# create tap point for infotainment
+sudo tunctl -u ${USER}
+sudo ifconfig tap1 ${INFOTMT_IP} up
+sudo route add -host ${INFOTMT_IP} dev tap1
+sudo route add default gw ${GATEWAY_IP} br0
+#sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap1/proxy_arp'
+#sudo arp -Ds ${INFOTMT_IP} eno1 pub
+
+
+# bridge tap points
 sudo brctl addif br0 tap0 tap1
+sudo route add default gw ${GATEWAY_IP} br0
 
 # spawn virtual machines
 name="Cluster"

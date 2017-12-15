@@ -22,46 +22,60 @@ set -x
 
 
 # NEW WAY OF DOING --
-# Followed instructions from https://tthtlc.wordpress.com/2015/10/21/qemu-how-to-setup-tuntap-bridge-networking/
 
 # remove stale tap points
 sudo tunctl -d tap0
 sudo tunctl -d tap1
 
-GATEWAY_IP=10.0.3.1
-CLUSTER_IP=10.0.3.2
-INFOTMT_IP=10.0.3.3
+GWAY_IP=10.0.3.1
+TAP0_IP=10.0.3.2
+IC___IP=10.0.3.20
+TAP1_IP=10.0.3.3
+IVI__IP=10.0.3.30
 
 # create bridge for tap points
 sudo ifconfig br0 down
 sudo brctl delbr br0
 sudo brctl addbr br0
-sudo ifconfig br0 ${GATEWAY_IP} up
-sudo route add -host ${GATEWAY_IP} dev br0
+sudo ifconfig br0 ${GWAY_IP} up netmask 255.255.255.0
+sudo route add -host ${GWAY_IP} dev br0
 
 # create tap point for cluster
 sudo tunctl -u ${USER}
-sudo ifconfig tap0 ${CLUSTER_IP} up
-sudo route add -host ${CLUSTER_IP} dev tap0
-#sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp'
-#sudo arp -Ds ${CLUSTER_IP} eno1 pub
+sudo ifconfig tap0 ${TAP0_IP} up netmask 255.255.255.0
+sudo route add -host ${TAP0_IP} dev tap0
 
 # create tap point for infotainment
 sudo tunctl -u ${USER}
-sudo ifconfig tap1 ${INFOTMT_IP} up
-sudo route add -host ${INFOTMT_IP} dev tap1
-sudo route add default gw ${GATEWAY_IP} br0
-#sudo bash -c 'echo 1 > /proc/sys/net/ipv4/conf/tap1/proxy_arp'
-#sudo arp -Ds ${INFOTMT_IP} eno1 pub
+sudo ifconfig tap1 ${TAP1_IP} up netmask 255.255.255.0
+sudo route add -host ${TAP1_IP} dev tap1
 
 
 # bridge tap points
 sudo brctl addif br0 tap0 tap1
-sudo route add default gw ${GATEWAY_IP} br0
+sudo route add default gw ${GWAY_IP} br0
 
 # spawn virtual machines
 name="Cluster"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$CLUSTER_IP"'::'"$GATEWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IC___IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
 
 name="Infotainment"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$INFOTMT_IP"'::'"$GATEWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IVI__IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+
+
+#wait till user press any key
+while true; do
+    read -p "Do you wish to revert network settings? " yn
+    case $yn in
+        [Yy]* ) break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+#sudo route add default gw ${curr_gw} ${curr_if}
+sudo route del default gw ${GWAY_IP}
+sudo tunctl -d tap0
+sudo tunctl -d tap1
+sudo ifconfig br0 down
+sudo brctl delbr br0

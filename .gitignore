@@ -4,3 +4,4 @@
 build
 layers/poky
 layers/meta-*
+images

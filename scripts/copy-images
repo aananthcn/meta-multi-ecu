@@ -1,0 +1,39 @@
+#! /bin/sh
+
+IMAGE_NAME=core-image-weston
+IMAGE=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4
+IMAGE_DIR=../images
+IC__IMG=cluster.ext4
+IVI_IMG=ivi.ext4
+
+if [ ! -f $IMAGE ]; then
+	echo "File "$IMAGE" not found!"
+	exit
+fi
+
+if [ ! -d $IMAGE_DIR ]; then
+	echo "Creating "$IMAGE_DIR
+	mkdir $IMAGE_DIR
+fi
+
+# copy IMAGE as cluster image
+if [ ! -f $IMAGE_DIR/$IC__IMG ]; then
+	echo "Copying "$IMAGE" to "$IMAGE_DIR"/"$IC__IMG
+	cp $IMAGE $IMAGE_DIR/$IC__IMG
+else
+	if [ "$IMAGE" -nt "$IMAGE_DIR/$IC__IMG" ]; then
+		echo "Replacing "$IMAGE_DIR"/"$IC__IMG" with "$IMAGE
+		cp $IMAGE $IMAGE_DIR/$IC__IMG
+	fi
+fi
+
+# copy IMAGE as ivi image
+if [ ! -f $IMAGE_DIR/$IVI_IMG ]; then
+	echo "Copying "$IMAGE" to "$IMAGE_DIR"/"$IVI_IMG
+	cp $IMAGE $IMAGE_DIR/$IVI_IMG
+else
+	if [ "$IMAGE" -nt "$IMAGE_DIR/$IVI_IMG" ]; then
+		echo "Replacing "$IMAGE_DIR"/"$IVI_IMG" with "$IMAGE
+		cp $IMAGE $IMAGE_DIR/$IVI_IMG
+	fi
+fi

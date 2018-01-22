@@ -3,25 +3,38 @@
 #IMAGE_NAME=multi-ecu-image
 IMAGE_NAME=core-image-weston
 
+IMAGE=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4
+IMAGE_DIR=../images
+IC__IMG=cluster.ext4
+IVI_IMG=ivi.ext4
+
+if [ ! -f $IMAGE ]; then
+	echo "File "$IMAGE" not found!"
+	exit
+fi
+
+if [ ! -d $IMAGE_DIR ]; then
+	echo "Creating "$IMAGE_DIR
+	mkdir $IMAGE_DIR
+fi
+
+# copy IMAGE as cluster image
+if [ ! -f $IMAGE_DIR/$IC__IMG ]; then
+	echo "Copying "$IMAGE" to "$IMAGE_DIR"/"$IC__IMG
+	cp $IMAGE $IMAGE_DIR/$IC__IMG
+fi
+
+# copy IMAGE as ivi image
+if [ ! -f $IMAGE_DIR/$IVI_IMG ]; then
+	echo "Copying "$IMAGE" to "$IMAGE_DIR"/"$IVI_IMG
+	cp $IMAGE $IMAGE_DIR/$IVI_IMG
+fi
+
 # Get sudo password for this session
 sudo pwd
 
 set -x
 
-
-# OLD WAY OF DOING --
-#port=2222
-#name="Cluster"
-#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.2::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
-
-#port=2223
-#name="Infotainment"
-#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci   -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip=192.168.7.3::192.168.7.1:255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -redir tcp:$port::22 -name $name &
-
-
-
-
-# NEW WAY OF DOING --
 
 # remove stale tap points
 sudo tunctl -d tap0
@@ -57,13 +70,16 @@ sudo route add default gw ${GWAY_IP} br0
 
 # spawn virtual machines
 name="Cluster"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IC___IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IC___IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -drive file=$IMAGE_DIR/$IC__IMG,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IC___IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=640x400-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
 
 name="Infotainment"
-sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IVI__IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+#sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=tmp/deploy/images/qemux86-64/${IMAGE_NAME}-qemux86-64.ext4,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IVI__IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
+sudo qemu-system-x86_64 -device virtio-net-pci,netdev=net0,mac=00:0c:29:f0:bc:30 -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -drive file=$IMAGE_DIR/$IVI_IMG,if=virtio,format=raw -vga vmware -show-cursor -usb -device usb-tablet -device virtio-rng-pci -cpu core2duo -m 2G -serial mon:vc -serial null -kernel tmp/deploy/images/qemux86-64/bzImage -append 'root=/dev/vda rw highres=off  mem=2G ip='"$IVI__IP"'::'"$GWAY_IP"':255.255.255.0 vga=0 uvesafb.mode_option=800x600-32 oprofile.timer=1 uvesafb.task_timeout=-1' -name $name &
 
 
 #wait till user press any key
+sleep 1
 while true; do
     read -p "Do you wish to revert network settings? " yn
     case $yn in
